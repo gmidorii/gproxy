@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 var proto = "http"
@@ -21,10 +22,15 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	host := r.URL.Query().Get("cors-url")
 	url := fmt.Sprintf("%s://%s%s", proto, host, r.URL)
-	resp, err := http.Get(url)
+
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+	resp, err := client.Get(url)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "Error")
 		return
 	}
 	defer resp.Body.Close()
@@ -33,6 +39,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "Error")
 		return
 	}
 
