@@ -3,7 +3,7 @@
 ### API Doc
 #### Request Parameter
 | Name      | Type   | Default | Description                         |
-|-----------+--------+---------+-------------------------------------|
+|-----------|--------|---------|-------------------------------------|
 | cors-host | string |         | The host name which want to request |
 | proto     | string | http    | The protocol connection             |
 
