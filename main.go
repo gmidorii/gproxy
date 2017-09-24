@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,6 +12,7 @@ import (
 )
 
 var proto = "http"
+var timeout time.Duration
 
 type response struct {
 	Resp *http.Response
@@ -18,8 +20,13 @@ type response struct {
 }
 
 func main() {
+	port := flag.String("p", "8080", "port num")
+	timeoutSec := flag.Int64("t", 3, "time out second")
+	flag.Parse()
+	timeout = time.Duration(*timeoutSec) * time.Second
+
 	http.HandleFunc("/", proxyHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", *port), nil))
 }
 
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +37,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	host := r.URL.Query().Get("cors-host")
 	url := fmt.Sprintf("%s://%s%s", proto, host, r.URL)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	body, err := corsGet(ctx, url)
 	if err != nil {
